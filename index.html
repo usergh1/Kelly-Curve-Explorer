@@ -22,7 +22,7 @@
     html, body { margin: 0; padding: 0; }
     body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(180deg, #fbfcff, var(--bg));
+      background: #ffffff;
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
@@ -50,6 +50,19 @@
       margin: 10px 0 0;
       color: var(--muted);
       font-size: 15px;
+    }
+    .hero-why {
+      margin: 10px 0 0;
+      color: #4c5d75;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 760px;
+    }
+    .hero-formula {
+      color: #35527d;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .95em;
+      white-space: nowrap;
     }
     .asset-tabs {
       display: grid;
@@ -126,9 +139,10 @@
     .chart-wrap {
       position: relative;
       margin-top: 14px;
-      border: 0;
-      border-radius: 0;
-      background: #ffffff;
+      border: 1px solid #e3e8ef;
+      border-radius: 24px;
+      background: #f7f9fc;
+      box-shadow: 0 12px 28px rgba(30, 55, 90, 0.06);
       overflow: hidden;
     }
     #kellyChart {
@@ -150,11 +164,13 @@
     .footer-dock .dock-group {
       width: min(920px, calc(100vw - 16px));
       margin: 0 auto;
-      background: transparent;
-      border: 0;
-      box-shadow: none;
-      border-radius: 0;
-      padding: 0;
+      background: rgba(255,255,255,.92);
+      border: 1px solid #e3eaf5;
+      box-shadow: 0 12px 30px rgba(24, 44, 78, 0.12);
+      border-radius: 22px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 10px;
       pointer-events: auto;
     }
     .dock-title {
@@ -227,63 +243,26 @@
       accent-color: var(--blue);
       margin: 0;
     }
-    .guide-panel {
-      margin-top: 18px;
-      padding: 0 4px 0 2px;
-    }
-    .guide-head {
-      margin-bottom: 14px;
-    }
-    .guide-kicker {
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--blue);
-    }
-    .guide-title {
-      margin: 6px 0 0;
-      font-size: clamp(22px, 4vw, 30px);
-      line-height: 1.08;
-      letter-spacing: -.03em;
-    }
-    .guide-lead {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .guide-section + .guide-section {
-      margin-top: 18px;
-    }
-    .guide-section h3 {
-      margin: 0;
-      font-size: 18px;
-      line-height: 1.2;
-      letter-spacing: -.02em;
-    }
-    .guide-section p {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-    }
-    .formula {
-      margin-top: 8px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 14px;
-      color: #35527d;
-      padding: 0;
-      overflow: auto;
-      white-space: nowrap;
-    }
     .muted { color: var(--muted); }
+    .status-main {
+      display: block;
+    }
+    .status-subnote {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 600;
+      color: #5f7698;
+    }
 
     @media (max-width: 740px) {
       .wrap { width: calc(100vw - 16px); }
       .hero { padding: 14px; }
       h1 { font-size: clamp(24px, 8vw, 30px); }
       .lead { margin-top: 8px; font-size: 13px; line-height: 1.45; }
+      .hero-why { margin-top: 8px; font-size: 12px; line-height: 1.5; }
+      .hero-formula { font-size: .92em; }
       .hero-meta { gap: 6px; margin-top: 10px; }
       .pill { padding: 6px 9px; font-size: 11px; }
       .asset-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -317,43 +296,18 @@
         line-height: 1.45;
         min-height: 0;
       }
+      .status-subnote {
+        margin-top: 5px;
+        font-size: 11px;
+        line-height: 1.4;
+      }
       .chart-panel { padding: 0; }
-      .guide-panel {
+      .chart-wrap {
         margin-top: 12px;
-        padding: 0 2px;
-      }
-      .guide-head {
-        margin-bottom: 10px;
-      }
-      .guide-kicker {
-        font-size: 10px;
-      }
-      .guide-title {
-        font-size: 20px;
-      }
-      .guide-lead {
-        margin-top: 6px;
-        font-size: 12px;
-        line-height: 1.45;
-      }
-      .guide-section + .guide-section {
-        margin-top: 16px;
-      }
-      .guide-section h3 {
-        font-size: 15px;
-      }
-      .guide-section p {
-        margin-top: 6px;
-        font-size: 12px;
-        line-height: 1.45;
-      }
-      .formula {
-        margin-top: 8px;
-        font-size: 12px;
-        padding: 8px 10px;
+        border-radius: 18px;
       }
       .jump-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .footer-dock .dock-group { width: calc(100vw - 12px); border-radius: 0; padding: 0; }
+      .footer-dock .dock-group { width: calc(100vw - 12px); border-radius: 18px; padding: 8px; }
       .footer-dock .dock-title { margin-bottom: 5px; }
       #kellyChart { height: 38vh; min-height: 240px; }
     }
@@ -364,11 +318,12 @@
     <section class="hero panel chart-panel">
       <h1>Kelly Curve Explorer</h1>
       <p class="lead">S&amp;P500・Nasdaq-100・半導体指数で、最適レバレッジの山頂を直感でつかむ</p>
+      <p class="hero-why">レバレッジを上げると期待リターンは押し上がりますが、同時に値動きの荒さも強く効きます。その綱引きの結果、成長率のカーブは山型になります。<span class="hero-formula">g(L) ≈ r + L(μ − r) − ½L²σ²</span></p>
 
       <div class="hero-meta">
-        <div class="pill" id="pillMu">μ 10%</div>
-        <div class="pill" id="pillSigma">σ 17%</div>
-        <div class="pill" id="pillRate">借入金利 4%</div>
+        <div class="pill" id="pillMu">期待リターン μ 10%</div>
+        <div class="pill" id="pillSigma">ボラティリティ σ 17%</div>
+        <div class="pill" id="pillRate">借入金利 r 4%</div>
       </div>
       <div class="chart-wrap">
         <canvas id="kellyChart"></canvas>
@@ -393,27 +348,6 @@
       </div>
 
       <div class="status" id="statusBox"></div>
-    </section>
-
-    <section class="guide-panel">
-      <div class="guide-head">
-        <div class="guide-kicker">Quick Guide</div>
-        <h2 class="guide-title">レバレッジの見方</h2>
-        <p class="guide-lead">折りたたみではなく、いま見ているグラフの意味をそのまま下で読める構成に変えています。</p>
-      </div>
-      <article class="guide-section">
-        <h3>なぜ山型になるのか</h3>
-        <p>レバレッジを上げると期待リターンは押し上がりますが、同時にボラティリティによる目減りも強くなります。どこかでその悪影響が上回るので、カーブは山型になります。</p>
-        <div class="formula">g(L) ≈ r + L(μ − r) − ½L²σ²</div>
-      </article>
-      <article class="guide-section">
-        <h3>幾何平均とは何か</h3>
-        <p>長期投資で見たいのは各年の平均点ではなく、最終的にどれくらい増えたかです。幾何平均は、その増え方のペースに近い感覚で読める指標です。</p>
-      </article>
-      <article class="guide-section">
-        <h3>なぜハーフケリーが使われるのか</h3>
-        <p>理論上の最適点は山頂ですが、その近くは値動きも大きくなります。実運用では少し左側、つまりハーフケリー前後を使ってリスクを抑える考え方がよく取られます。</p>
-      </article>
     </section>
   </div>
     <div class="footer-dock">
@@ -501,9 +435,9 @@
     }
 
     function syncControls() {
-      el('pillMu').textContent = `μ ${fmtPct(state.mu)}`;
-      el('pillSigma').textContent = `σ ${fmtPct(state.sigma)}`;
-      el('pillRate').textContent = `借入金利 ${fmtPct(state.rate)}`;
+      el('pillMu').textContent = `期待リターン μ ${fmtPct(state.mu)}`;
+      el('pillSigma').textContent = `ボラティリティ σ ${fmtPct(state.sigma)}`;
+      el('pillRate').textContent = `借入金利 r ${fmtPct(state.rate)}`;
     }
 
     function buildStatus(current, optimal, currentGrowth) {
@@ -518,6 +452,10 @@
         return `今の ${fmtLev(current)} は山頂 ${fmtLev(optimal)} を越えています。幾何平均成長率は ${fmtPct2(currentGrowth)} で、ここからはレバレッジを増やすほど、期待リターンよりボラティリティの悪影響が勝ちやすくなります。`;
       }
       return `今の ${fmtLev(current)} はハーフケリー ${fmtLev(half)} と山頂 ${fmtLev(optimal)} の間です。幾何平均成長率は ${fmtPct2(currentGrowth)} で、実運用ではこのあたりでも十分に攻めた水準です。`;
+    }
+
+    function buildStatusNote(optimal) {
+      return `実運用では山頂より少し左、ハーフケリー ${fmtLev(optimal / 2)} 前後でリスクを抑える考え方がよく使われます。`;
     }
 
     function draw() {
@@ -614,7 +552,7 @@
       el('kpiOptimal').textContent = fmtLev(opt);
       el('kpiCurrent').textContent = fmtLev(state.lev);
       el('kpiGrowth').textContent = fmtPct2(curG);
-      el('statusBox').textContent = buildStatus(state.lev, opt, curG);
+      el('statusBox').innerHTML = `<span class="status-main">${buildStatus(state.lev, opt, curG)}</span><span class="status-subnote">${buildStatusNote(opt)}</span>`;
     }
 
 
