@@ -40,14 +40,6 @@
       box-shadow: var(--shadow);
     }
     .hero { padding: 16px; }
-    .eyebrow {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--blue);
-      margin-bottom: 8px;
-    }
     h1 {
       margin: 0;
       font-size: clamp(28px, 7vw, 44px);
@@ -278,20 +270,57 @@
     @media (max-width: 740px) {
       .wrap { width: calc(100vw - 16px); }
       .hero { padding: 14px; }
+      h1 { font-size: clamp(24px, 8vw, 30px); }
+      .lead { margin-top: 8px; font-size: 13px; line-height: 1.45; }
+      .hero-meta { gap: 6px; margin-top: 10px; }
+      .pill { padding: 6px 9px; font-size: 11px; }
       .asset-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .kpi-grid { grid-template-columns: 1fr; }
+      .kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .kpi {
+        border-radius: 12px;
+        padding: 8px;
+      }
+      .kpi .label {
+        font-size: 10px;
+        line-height: 1.25;
+      }
+      .kpi .value {
+        margin-top: 4px;
+        font-size: clamp(14px, 4.8vw, 18px);
+      }
+      .kpi .note {
+        margin-top: 4px;
+        font-size: 10px;
+        line-height: 1.25;
+      }
+      .status {
+        margin-top: 8px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 12px;
+        line-height: 1.45;
+        min-height: 0;
+      }
       .chart-panel { padding: 12px; }
+      .chart-caption {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
       .jump-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .footer-dock .dock-group { width: calc(100vw - 12px); border-radius: 16px; padding: 8px; }
       .footer-dock .dock-title { margin-bottom: 5px; }
-      #kellyChart { height: 52vh; min-height: 380px; }
+      #kellyChart { height: 38vh; min-height: 240px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <section class="hero panel chart-panel">
-      <div class="eyebrow">Kelly Curve Explorer</div>
       <h1>Kelly Curve Explorer</h1>
       <p class="lead">S&amp;P500・Nasdaq-100・半導体指数で、最適レバレッジの山頂を直感でつかむ</p>
 
@@ -381,8 +410,14 @@
     const fmtPct = v => `${(v * 100).toFixed(1)}%`;
     const fmtPct2 = v => `${(v * 100).toFixed(2)}%`;
     const fmtLev = v => `${v.toFixed(2)}x`;
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
     const growth = (L, mu, sigma, rate) => rate + L * (mu - rate) - 0.5 * L * L * sigma * sigma;
-    const optimalLev = (mu, sigma, rate) => Math.max(0, (mu - rate) / (sigma * sigma));
+    const optimalLev = (mu, sigma, rate) => {
+      if (!Number.isFinite(mu) || !Number.isFinite(sigma) || !Number.isFinite(rate) || sigma <= 0) {
+        return 0;
+      }
+      return Math.max(0, (mu - rate) / (sigma * sigma));
+    };
 
     const canvas = el('kellyChart');
     const ctx = canvas.getContext('2d');
@@ -390,6 +425,7 @@
     function resizeCanvas() {
       const ratio = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
       canvas.width = rect.width * ratio;
       canvas.height = rect.height * ratio;
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -402,7 +438,8 @@
       if (key === 'half') state.lev = opt / 2;
       else if (key === 'optimal') state.lev = opt;
       else state.lev = +key;
-      state.lev = Math.max(0, Math.min(4, state.lev));
+      if (!Number.isFinite(state.lev)) state.lev = 0;
+      state.lev = clamp(state.lev, 0, 4);
       document.querySelectorAll('.jump-chip').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.jump === key);
       });
@@ -411,11 +448,12 @@
 
     function setAsset(key) {
       const a = assets[key];
+      if (!a) return;
       state.asset = key;
       state.mu = a.mu;
       state.sigma = a.sigma;
       state.rate = a.rate;
-      state.lev = Math.min(state.lev, 4);
+      state.lev = clamp(state.lev, 0, 4);
       document.querySelectorAll('.asset-tab').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.asset === key);
       });
@@ -432,35 +470,41 @@
     function buildStatus(current, optimal, currentGrowth) {
       const half = optimal / 2;
       if (current < optimal * 0.8) {
-        return `山頂は ${fmtLev(optimal)} 付近です。今の ${fmtLev(current)} はまだ山の左側にあり、レバレッジを増やすと成長率が上がりやすい位置です。`;
+        return `山頂は ${fmtLev(optimal)} 付近です。今の ${fmtLev(current)} はまだ山の左側にあり、幾何平均成長率は ${fmtPct2(currentGrowth)} です。レバレッジを増やすと成長率が上がりやすい位置です。`;
       }
       if (Math.abs(current - optimal) < 0.15) {
-        return `今の ${fmtLev(current)} は山頂付近です。このあたりで幾何平均成長率が最大になりやすく、理論上はかなり攻めた位置です。`;
+        return `今の ${fmtLev(current)} は山頂付近です。幾何平均成長率は ${fmtPct2(currentGrowth)} で、このあたりが理論上の最大になりやすい位置です。`;
       }
       if (current > optimal) {
-        return `今の ${fmtLev(current)} は山頂 ${fmtLev(optimal)} を越えています。ここからはレバレッジを増やすほど、期待リターンよりボラティリティの悪影響が勝ちやすくなります。`;
+        return `今の ${fmtLev(current)} は山頂 ${fmtLev(optimal)} を越えています。幾何平均成長率は ${fmtPct2(currentGrowth)} で、ここからはレバレッジを増やすほど、期待リターンよりボラティリティの悪影響が勝ちやすくなります。`;
       }
-      return `今の ${fmtLev(current)} はハーフケリー ${fmtLev(half)} と山頂 ${fmtLev(optimal)} の間です。成長率は高めですが、実運用ではこのあたりでも十分に攻めた水準です。`;
+      return `今の ${fmtLev(current)} はハーフケリー ${fmtLev(half)} と山頂 ${fmtLev(optimal)} の間です。幾何平均成長率は ${fmtPct2(currentGrowth)} で、実運用ではこのあたりでも十分に攻めた水準です。`;
     }
 
     function draw() {
       const width = canvas.getBoundingClientRect().width;
       const height = canvas.getBoundingClientRect().height;
+      if (!width || !height) return;
       ctx.clearRect(0, 0, width, height);
 
       const pad = { l: 50, r: 18, t: 18, b: 34 };
       const rect = { x: pad.l, y: pad.t, w: width - pad.l - pad.r, h: height - pad.t - pad.b };
       const maxL = 4;
       const opt = optimalLev(state.mu, state.sigma, state.rate);
+      const optOnChart = clamp(opt, 0, maxL);
+      const currentOnChart = clamp(state.lev, 0, maxL);
       const curve = [];
       for (let i = 0; i <= 400; i++) {
         const L = maxL * i / 400;
         curve.push({ L, g: growth(L, state.mu, state.sigma, state.rate) });
       }
-      const yMin = Math.min(-0.20, ...curve.map(p => p.g), growth(state.lev, state.mu, state.sigma, state.rate) - 0.02);
-      const yMax = Math.max(0.16, ...curve.map(p => p.g), growth(opt, state.mu, state.sigma, state.rate) + 0.02);
-      const xMap = v => rect.x + rect.w * (v / maxL);
-      const yMap = v => rect.y + rect.h * (1 - (v - yMin) / (yMax - yMin));
+      const curG = growth(currentOnChart, state.mu, state.sigma, state.rate);
+      const optG = growth(optOnChart, state.mu, state.sigma, state.rate);
+      const yMin = Math.min(-0.20, ...curve.map(p => p.g), curG - 0.02);
+      const yMax = Math.max(0.16, ...curve.map(p => p.g), optG + 0.02);
+      const ySpan = yMax - yMin || 1;
+      const xMap = v => rect.x + rect.w * (clamp(v, 0, maxL) / maxL);
+      const yMap = v => rect.y + rect.h * (1 - (v - yMin) / ySpan);
 
       ctx.strokeStyle = 'rgba(96,112,137,.16)';
       ctx.lineWidth = 1;
@@ -500,9 +544,6 @@
         ctx.fillText(`${v}x`, xx - 7, Math.max(rect.y + 16, yy - 10));
       });
 
-      const optG = growth(opt, state.mu, state.sigma, state.rate);
-      const curG = growth(state.lev, state.mu, state.sigma, state.rate);
-
       const drawPoint = (x, y, color, radius=7) => {
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
@@ -510,14 +551,26 @@
         ctx.beginPath(); ctx.arc(x, y, radius / 2.6, 0, Math.PI * 2); ctx.fill();
       };
 
-      drawPoint(xMap(opt), yMap(optG), '#1b936c', 8);
-      drawPoint(xMap(state.lev), yMap(curG), '#2f6fed', 8);
+      const pointsOverlap = Math.abs(currentOnChart - optOnChart) < 0.02 && Math.abs(curG - optG) < 0.002;
+      if (pointsOverlap) {
+        const x = xMap(optOnChart);
+        const y = yMap(optG);
+        drawPoint(x, y, '#1b936c', 9);
+        ctx.strokeStyle = '#2f6fed';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        drawPoint(xMap(optOnChart), yMap(optG), '#1b936c', 8);
+        drawPoint(xMap(currentOnChart), yMap(curG), '#2f6fed', 8);
+      }
 
       ctx.fillStyle = '#1b936c';
       ctx.font = '700 12px system-ui, sans-serif';
-      ctx.fillText(`山頂 ${fmtLev(opt)}`, Math.max(rect.x + 6, xMap(opt) - 22), Math.max(rect.y + 14, yMap(optG) - 14));
+      ctx.fillText(`山頂 ${fmtLev(opt)}`, Math.max(rect.x + 6, xMap(optOnChart) - 22), Math.max(rect.y + 14, yMap(optG) - 14));
       ctx.fillStyle = '#2f6fed';
-      ctx.fillText(`今 ${fmtLev(state.lev)}`, Math.max(rect.x + 6, xMap(state.lev) - 18), yMap(curG) + 22);
+      ctx.fillText(`今 ${fmtLev(state.lev)}`, Math.max(rect.x + 6, xMap(currentOnChart) - 18), yMap(curG) + 22);
 
       el('kpiOptimal').textContent = fmtLev(opt);
       el('kpiCurrent').textContent = fmtLev(state.lev);
