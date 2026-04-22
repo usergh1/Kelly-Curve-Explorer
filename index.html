@@ -26,7 +26,7 @@
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      padding-bottom: 28px;
+      padding-bottom: 170px;
     }
     .wrap {
       width: min(920px, calc(100vw - 20px));
@@ -63,7 +63,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 0;
     }
     .asset-tab {
       appearance: none;
@@ -87,12 +87,11 @@
       gap: 8px;
       margin-top: 12px;
     }
-    .jump-panel { margin-top: 14px; padding: 14px; }
-    .jump-chips {
+        .jump-chips {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
-      margin-top: 10px;
+      margin-top: 0;
     }
     .jump-chip {
       appearance: none;
@@ -143,6 +142,33 @@
       color: var(--muted);
       font-size: 13px;
     }
+    .footer-dock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(245,247,251,0) 0%, rgba(245,247,251,0.88) 18%, rgba(245,247,251,0.98) 40%);
+      backdrop-filter: blur(12px);
+    }
+    .footer-dock .dock-group {
+      width: min(920px, calc(100vw - 16px));
+      margin: 0 auto 8px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 10px;
+    }
+    .dock-title {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .dock-row { width: 100%; }
+    .dock-divider { height: 1px; background: var(--line); margin: 10px 0; }
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -252,33 +278,25 @@
       .hero { padding: 14px; }
       .asset-tabs { grid-template-columns: 1fr; }
       .kpi-grid { grid-template-columns: 1fr; }
-      .chart-panel, .jump-panel { padding: 12px; }
+      .chart-panel { padding: 12px; }
       .jump-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .footer-dock .dock-group { width: calc(100vw - 12px); margin-bottom: 6px; border-radius: 16px; }
       #kellyChart { height: 52vh; min-height: 380px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <section class="hero">
-      <div class="eyebrow">Mobile-first tool</div>
-      <h1>ケリーの山型カーブだけを、<br>大きく見る</h1>
-      <p class="lead">このページの主役はグラフです。レバレッジを上げると成長率がどう変わるかを、まず感覚でつかみ、そのあとで必要な理論だけを下で確認できます。</p>
-
-      <div class="asset-tabs" id="assetTabs">
-        <button class="asset-tab active" data-asset="sp500">S&amp;P500</button>
-        <button class="asset-tab" data-asset="nasdaq">Nasdaq-100</button>
-        <button class="asset-tab" data-asset="semi">半導体指数</button>
-      </div>
+    <section class="hero panel chart-panel">
+      <div class="eyebrow">Kelly Curve Explorer</div>
+      <h1>Kelly Curve Explorer</h1>
+      <p class="lead">S&amp;P500・Nasdaq-100・半導体指数で、最適レバレッジの山頂を直感でつかむ</p>
 
       <div class="hero-meta">
         <div class="pill" id="pillMu">μ 10%</div>
         <div class="pill" id="pillSigma">σ 17%</div>
         <div class="pill" id="pillRate">借入金利 4%</div>
       </div>
-    </section>
-
-    <section class="panel chart-panel">
       <div class="chart-wrap">
         <canvas id="kellyChart"></canvas>
       </div>
@@ -303,18 +321,6 @@
       </div>
 
       <div class="status" id="statusBox"></div>
-    </section>
-
-    <section class="panel jump-panel">
-      <div class="block-title">代表的な倍率を見る</div>
-      <div class="muted" style="font-size:13px;">細かく動かすより、よく見たい倍率にすばやく飛ぶ構成にしています。</div>
-      <div class="jump-chips" id="jumpChips">
-        <button class="jump-chip active" data-jump="1">1x</button>
-        <button class="jump-chip" data-jump="2">2x</button>
-        <button class="jump-chip" data-jump="3">3x</button>
-        <button class="jump-chip" data-jump="half">Half Kelly</button>
-        <button class="jump-chip" data-jump="optimal">Optimal</button>
-      </div>
     </section>
 
     <details class="panel">
@@ -359,6 +365,25 @@
       </div>
     </details>
   </div>
+    <div class="footer-dock">
+      <div class="dock-group dock-combined">
+        <div class="dock-title">資産を切り替える</div>
+        <div class="dock-row asset-tabs" id="assetTabs">
+          <button class="asset-tab active" data-asset="sp500">S&amp;P500</button>
+          <button class="asset-tab" data-asset="nasdaq">Nasdaq-100</button>
+          <button class="asset-tab" data-asset="semi">半導体指数</button>
+        </div>
+        <div class="dock-divider"></div>
+        <div class="dock-title">代表的な倍率を見る</div>
+        <div class="dock-row jump-chips" id="jumpChips">
+          <button class="jump-chip active" data-jump="1">1x</button>
+          <button class="jump-chip" data-jump="2">2x</button>
+          <button class="jump-chip" data-jump="3">3x</button>
+          <button class="jump-chip" data-jump="half">Half Kelly</button>
+          <button class="jump-chip" data-jump="optimal">Optimal</button>
+        </div>
+      </div>
+    </div>
 
   <script>
     const assets = {
