@@ -26,7 +26,7 @@
       color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      padding-bottom: 260px;
+      padding-bottom: 190px;
     }
     .wrap {
       width: min(920px, calc(100vw - 20px));
@@ -148,20 +148,20 @@
       position: fixed;
       left: 0;
       right: 0;
-      bottom: 0;
+      bottom: env(safe-area-inset-bottom);
       z-index: 30;
-      padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(245,247,251,0) 0%, rgba(245,247,251,0.88) 18%, rgba(245,247,251,0.98) 40%);
-      backdrop-filter: blur(12px);
+      padding: 0 8px 8px;
+      pointer-events: none;
     }
     .footer-dock .dock-group {
       width: min(920px, calc(100vw - 16px));
-      margin: 0 auto 8px;
+      margin: 0 auto;
       background: rgba(255,255,255,.96);
       border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(24, 44, 78, 0.12);
+      border-radius: 20px;
       padding: 10px;
+      pointer-events: auto;
     }
     .dock-title {
       font-size: 11px;
@@ -170,7 +170,7 @@
       margin: 0 0 6px;
     }
     .dock-row { width: 100%; }
-    .dock-divider { height: 1px; background: var(--line); margin: 10px 0; }
+    .dock-divider { height: 1px; background: var(--line); margin: 8px 0; }
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -282,9 +282,8 @@
       .kpi-grid { grid-template-columns: 1fr; }
       .chart-panel { padding: 12px; }
       .jump-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .footer-dock .dock-group { width: calc(100vw - 12px); margin-bottom: 6px; border-radius: 16px; }
-      .footer-dock .dock-title { margin-bottom: 6px; }
-      .footer-dock .dock-group { padding: 8px; }
+      .footer-dock .dock-group { width: calc(100vw - 12px); border-radius: 16px; padding: 8px; }
+      .footer-dock .dock-title { margin-bottom: 5px; }
       #kellyChart { height: 52vh; min-height: 380px; }
     }
   </style>
@@ -326,26 +325,6 @@
 
       <div class="status" id="statusBox"></div>
     </section>
-
-    <details class="panel">
-      <summary>詳細パラメータを調整</summary>
-      <div class="details-body">
-        <div class="param-grid">
-          <div class="soft">
-            <div class="slider-label-row"><span>期待リターン μ</span><span class="slider-value" id="muValue">10.0%</span></div>
-            <input id="muRange" type="range" min="0.04" max="0.18" step="0.001" value="0.10">
-          </div>
-          <div class="soft">
-            <div class="slider-label-row"><span>ボラティリティ σ</span><span class="slider-value" id="sigmaValue">17.0%</span></div>
-            <input id="sigmaRange" type="range" min="0.10" max="0.40" step="0.001" value="0.17">
-          </div>
-          <div class="soft">
-            <div class="slider-label-row"><span>借入金利 r</span><span class="slider-value" id="rateValue">4.0%</span></div>
-            <input id="rateRange" type="range" min="0.00" max="0.08" step="0.001" value="0.04">
-          </div>
-        </div>
-      </div>
-    </details>
 
     <details class="panel theory">
       <summary>なぜ山型になるのか</summary>
@@ -445,9 +424,6 @@
     }
 
     function syncControls() {
-      el('muRange').value = state.mu;
-      el('sigmaRange').value = state.sigma;
-      el('rateRange').value = state.rate;
       el('muValue').textContent = fmtPct(state.mu);
       el('sigmaValue').textContent = fmtPct(state.sigma);
       el('rateValue').textContent = fmtPct(state.rate);
@@ -559,9 +535,6 @@
     document.querySelectorAll('.jump-chip').forEach(btn => {
       btn.addEventListener('click', () => setJump(btn.dataset.jump));
     });
-    el('muRange').addEventListener('input', e => { state.mu = +e.target.value; syncControls(); setJump(state.selectedJump || '1'); });
-    el('sigmaRange').addEventListener('input', e => { state.sigma = +e.target.value; syncControls(); setJump(state.selectedJump || '1'); });
-    el('rateRange').addEventListener('input', e => { state.rate = +e.target.value; syncControls(); setJump(state.selectedJump || '1'); });
     window.addEventListener('resize', resizeCanvas);
 
     syncControls();
