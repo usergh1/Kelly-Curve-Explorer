@@ -58,6 +58,13 @@
       line-height: 1.6;
       max-width: 760px;
     }
+    .hero-equation {
+      margin: 8px 0 0;
+      color: #486281;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+    }
     .hero-formula {
       color: #35527d;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -131,6 +138,10 @@
       font-size: 12px;
       color: var(--muted);
       font-weight: 700;
+    }
+    .pill-label,
+    .pill-value {
+      display: inline;
     }
     .chart-panel {
       margin-top: 14px;
@@ -250,6 +261,7 @@
       .hero { padding: 14px; }
       h1 { font-size: clamp(24px, 8vw, 30px); }
       .lead { margin-top: 8px; font-size: 13px; line-height: 1.45; }
+      .hero-equation { margin-top: 7px; font-size: 12px; line-height: 1.4; }
       .hero-why { margin-top: 8px; font-size: 12px; line-height: 1.5; }
       .hero-formula { font-size: .92em; }
       .hero-meta {
@@ -264,6 +276,13 @@
         font-size: 10px;
         line-height: 1.3;
         text-align: center;
+      }
+      .pill-label,
+      .pill-value {
+        display: block;
+      }
+      .pill-value {
+        margin-top: 2px;
       }
       .asset-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .asset-tab, .jump-chip {
@@ -323,12 +342,13 @@
     <section class="hero panel chart-panel">
       <h1>Kelly Curve Explorer</h1>
       <p class="lead">S&amp;P500・Nasdaq-100・半導体指数で、最適レバレッジの山頂を直感でつかむ</p>
-      <p class="hero-why">レバレッジを上げると期待リターンは押し上がりますが、同時に値動きの荒さも強く効きます。その綱引きの結果、成長率のカーブは山型になります。<span class="hero-formula">g(L) ≈ r + L(μ − r) − ½L²σ²</span></p>
+      <div class="hero-equation"><span class="hero-formula">g(L) ≈ r + L(μ − r) − ½L²σ²</span></div>
+      <p class="hero-why">レバレッジを上げると期待リターンは押し上がりますが、同時に値動きの荒さも強く効きます。その綱引きの結果、成長率のカーブは山型になります。</p>
 
       <div class="hero-meta">
-        <div class="pill" id="pillMu">期待リターン μ 10%</div>
-        <div class="pill" id="pillSigma">ボラティリティ σ 17%</div>
-        <div class="pill" id="pillRate">借入金利 r 4%</div>
+        <div class="pill" id="pillMu"><span class="pill-label">期待リターン</span><span class="pill-value">μ 10%</span></div>
+        <div class="pill" id="pillSigma"><span class="pill-label">ボラティリティ</span><span class="pill-value">σ 17%</span></div>
+        <div class="pill" id="pillRate"><span class="pill-label">借入金利</span><span class="pill-value">r 4%</span></div>
       </div>
       <div class="chart-wrap">
         <canvas id="kellyChart"></canvas>
@@ -390,6 +410,7 @@
     const fmtPct2 = v => `${(v * 100).toFixed(2)}%`;
     const fmtLev = v => `${v.toFixed(2)}x`;
     const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const pillMarkup = (label, symbol, value) => `<span class="pill-label">${label}</span><span class="pill-value">${symbol} ${value}</span>`;
     const growth = (L, mu, sigma, rate) => rate + L * (mu - rate) - 0.5 * L * L * sigma * sigma;
     const optimalLev = (mu, sigma, rate) => {
       if (!Number.isFinite(mu) || !Number.isFinite(sigma) || !Number.isFinite(rate) || sigma <= 0) {
@@ -441,9 +462,9 @@
     }
 
     function syncControls() {
-      el('pillMu').textContent = `期待リターン μ ${fmtPct(state.mu)}`;
-      el('pillSigma').textContent = `ボラティリティ σ ${fmtPct(state.sigma)}`;
-      el('pillRate').textContent = `借入金利 r ${fmtPct(state.rate)}`;
+      el('pillMu').innerHTML = pillMarkup('期待リターン', 'μ', fmtPct(state.mu));
+      el('pillSigma').innerHTML = pillMarkup('ボラティリティ', 'σ', fmtPct(state.sigma));
+      el('pillRate').innerHTML = pillMarkup('借入金利', 'r', fmtPct(state.rate));
     }
 
     function buildStatus(current, optimal, currentGrowth) {
