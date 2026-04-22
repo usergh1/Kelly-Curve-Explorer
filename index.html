@@ -59,16 +59,17 @@
     }
     .asset-tab {
       appearance: none;
-      border: 1px solid var(--line);
-      background: var(--soft);
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.72);
       color: var(--text);
       border-radius: 999px;
-      padding: 9px 8px;
+      padding: 8px 10px;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
       text-align: center;
       white-space: nowrap;
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease;
     }
     .asset-tab.active {
       background: #eef4ff;
@@ -89,15 +90,16 @@
     }
     .jump-chip {
       appearance: none;
-      border: 1px solid var(--line);
-      background: var(--soft);
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.72);
       color: var(--text);
       border-radius: 999px;
-      padding: 9px 8px;
+      padding: 8px 10px;
       font-size: 12px;
       font-weight: 900;
       cursor: pointer;
       text-align: center;
+      transition: background-color .18s ease, border-color .18s ease, color .18s ease;
     }
     .jump-chip.active {
       background: #eef4ff;
@@ -115,13 +117,18 @@
     }
     .chart-panel {
       margin-top: 14px;
-      padding: 12px;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
     .chart-wrap {
       position: relative;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fcfdff;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 0;
+      background: #ffffff;
       overflow: hidden;
     }
     #kellyChart {
@@ -130,11 +137,6 @@
       min-height: 340px;
       display: block;
       touch-action: none;
-    }
-    .chart-caption {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 13px;
     }
     .footer-dock {
       position: fixed;
@@ -148,11 +150,11 @@
     .footer-dock .dock-group {
       width: min(920px, calc(100vw - 16px));
       margin: 0 auto;
-      background: rgba(255,255,255,.96);
-      border: 1px solid var(--line);
-      box-shadow: 0 10px 28px rgba(24, 44, 78, 0.12);
-      border-radius: 20px;
-      padding: 10px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 0;
       pointer-events: auto;
     }
     .dock-title {
@@ -225,47 +227,57 @@
       accent-color: var(--blue);
       margin: 0;
     }
-    details.panel {
-      margin-top: 12px;
-      overflow: hidden;
+    .guide-panel {
+      margin-top: 18px;
+      padding: 0 4px 0 2px;
     }
-    details.panel summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 16px;
+    .guide-head {
+      margin-bottom: 14px;
+    }
+    .guide-kicker {
+      font-size: 11px;
       font-weight: 900;
-      font-size: 15px;
-      user-select: none;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--blue);
     }
-    details.panel summary::-webkit-details-marker { display: none; }
-    .details-body {
-      padding: 0 16px 16px;
-      border-top: 1px solid var(--line);
+    .guide-title {
+      margin: 6px 0 0;
+      font-size: clamp(22px, 4vw, 30px);
+      line-height: 1.08;
+      letter-spacing: -.03em;
     }
-    .param-grid {
-      display: grid;
-      gap: 14px;
-      margin-top: 14px;
+    .guide-lead {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
     }
-    .soft {
-      background: var(--soft);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
+    .guide-section + .guide-section {
+      margin-top: 18px;
+    }
+    .guide-section h3 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: -.02em;
+    }
+    .guide-section p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
     }
     .formula {
-      margin-top: 10px;
+      margin-top: 8px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 14px;
-      background: #f8fbff;
-      border: 1px solid #e0e8f5;
-      border-radius: 12px;
-      padding: 10px 12px;
+      color: #35527d;
+      padding: 0;
       overflow: auto;
       white-space: nowrap;
     }
     .muted { color: var(--muted); }
-    .theory p { margin: 10px 0 0; }
 
     @media (max-width: 740px) {
       .wrap { width: calc(100vw - 16px); }
@@ -305,14 +317,43 @@
         line-height: 1.45;
         min-height: 0;
       }
-      .chart-panel { padding: 12px; }
-      .chart-caption {
-        margin-top: 8px;
+      .chart-panel { padding: 0; }
+      .guide-panel {
+        margin-top: 12px;
+        padding: 0 2px;
+      }
+      .guide-head {
+        margin-bottom: 10px;
+      }
+      .guide-kicker {
+        font-size: 10px;
+      }
+      .guide-title {
+        font-size: 20px;
+      }
+      .guide-lead {
+        margin-top: 6px;
         font-size: 12px;
         line-height: 1.45;
       }
+      .guide-section + .guide-section {
+        margin-top: 16px;
+      }
+      .guide-section h3 {
+        font-size: 15px;
+      }
+      .guide-section p {
+        margin-top: 6px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .formula {
+        margin-top: 8px;
+        font-size: 12px;
+        padding: 8px 10px;
+      }
       .jump-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .footer-dock .dock-group { width: calc(100vw - 12px); border-radius: 16px; padding: 8px; }
+      .footer-dock .dock-group { width: calc(100vw - 12px); border-radius: 0; padding: 0; }
       .footer-dock .dock-title { margin-bottom: 5px; }
       #kellyChart { height: 38vh; min-height: 240px; }
     }
@@ -332,7 +373,6 @@
       <div class="chart-wrap">
         <canvas id="kellyChart"></canvas>
       </div>
-      <div class="chart-caption">青い点が「今見ている倍率」、緑の点が「理論上の山頂」です。下のボタンで 1x / 2x / 3x / Half Kelly / Optimal をすばやく比較できます。</div>
 
       <div class="kpi-grid">
         <div class="kpi">
@@ -355,27 +395,26 @@
       <div class="status" id="statusBox"></div>
     </section>
 
-    <details class="panel theory">
-      <summary>なぜ山型になるのか</summary>
-      <div class="details-body">
-        <p class="muted">レバレッジを上げると、期待リターンの押し上げと同時に、ボラティリティによる目減りも大きくなります。最初はリターンの押し上げが勝ちますが、どこかでボラティリティの悪影響が上回り、カーブは山型になります。</p>
+    <section class="guide-panel">
+      <div class="guide-head">
+        <div class="guide-kicker">Quick Guide</div>
+        <h2 class="guide-title">レバレッジの見方</h2>
+        <p class="guide-lead">折りたたみではなく、いま見ているグラフの意味をそのまま下で読める構成に変えています。</p>
+      </div>
+      <article class="guide-section">
+        <h3>なぜ山型になるのか</h3>
+        <p>レバレッジを上げると期待リターンは押し上がりますが、同時にボラティリティによる目減りも強くなります。どこかでその悪影響が上回るので、カーブは山型になります。</p>
         <div class="formula">g(L) ≈ r + L(μ − r) − ½L²σ²</div>
-      </div>
-    </details>
-
-    <details class="panel theory">
-      <summary>幾何平均とは何か</summary>
-      <div class="details-body">
-        <p class="muted">長期投資で知りたいのは、各年の平均点というより、結局いくらになったかです。幾何平均は、値動きを含めたうえで、資産が実際にどれくらいのペースで増えたかに近い平均です。</p>
-      </div>
-    </details>
-
-    <details class="panel theory">
-      <summary>なぜハーフケリーがよく使われるのか</summary>
-      <div class="details-body">
-        <p class="muted">理論上の山頂は最適点ですが、その近くはボラティリティも大きくなります。実運用では不確実性を考えて、山頂より少し左、つまり 1/2 ケリー前後を使うことがよくあります。</p>
-      </div>
-    </details>
+      </article>
+      <article class="guide-section">
+        <h3>幾何平均とは何か</h3>
+        <p>長期投資で見たいのは各年の平均点ではなく、最終的にどれくらい増えたかです。幾何平均は、その増え方のペースに近い感覚で読める指標です。</p>
+      </article>
+      <article class="guide-section">
+        <h3>なぜハーフケリーが使われるのか</h3>
+        <p>理論上の最適点は山頂ですが、その近くは値動きも大きくなります。実運用では少し左側、つまりハーフケリー前後を使ってリスクを抑える考え方がよく取られます。</p>
+      </article>
+    </section>
   </div>
     <div class="footer-dock">
       <div class="dock-group dock-combined">
