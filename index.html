@@ -2,732 +2,571 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ケリー基準の完成形デモ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Kelly Curve Explorer</title>
   <style>
     :root {
-      --bg: #f6f8fc;
+      --bg: #f5f7fb;
       --panel: #ffffff;
-      --soft: #f4f7fc;
-      --line: #dde6f2;
+      --soft: #f2f5fa;
+      --line: #dde5f0;
       --text: #122033;
-      --muted: #5b6980;
+      --muted: #607089;
       --blue: #2f6fed;
-      --green: #13976a;
-      --gold: #c48d08;
-      --red: #c9485d;
-      --shadow: 0 14px 38px rgba(24, 42, 72, 0.08);
+      --green: #1b936c;
+      --red: #d9485f;
+      --shadow: 0 14px 36px rgba(24, 44, 78, 0.08);
       --radius: 20px;
     }
     * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
     body {
-      margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(180deg, #fbfcff, #f5f7fb 40%, #fbfcff);
+      background: linear-gradient(180deg, #fbfcff, var(--bg));
       color: var(--text);
-      line-height: 1.75;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 260px;
     }
     .wrap {
-      width: min(1180px, calc(100vw - 28px));
+      width: min(920px, calc(100vw - 20px));
       margin: 0 auto;
-      padding-bottom: 64px;
+      padding: 14px 0 28px;
     }
-    header {
-      padding: 56px 0 26px;
-    }
-    .eyebrow {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--blue);
-      font-weight: 800;
-    }
-    h1 {
-      font-size: clamp(34px, 5vw, 58px);
-      line-height: 1.06;
-      margin: 10px 0 16px;
-      max-width: 980px;
-    }
-    .lead {
-      color: var(--muted);
-      font-size: clamp(16px, 2vw, 20px);
-      max-width: 960px;
-    }
-    .hero-grid, .grid-2, .grid-3, .controls, .kpis, .mini-cards, .summary-grid {
-      display: grid;
-      gap: 18px;
-    }
-    .hero-grid { grid-template-columns: 1.45fr 1fr; margin-top: 26px; }
-    .grid-2 { grid-template-columns: 1.2fr .8fr; }
-    .grid-3, .summary-grid { grid-template-columns: repeat(3, 1fr); }
-    .controls { grid-template-columns: repeat(3, 1fr); }
-    .kpis { grid-template-columns: repeat(2, 1fr); }
-    .mini-cards { grid-template-columns: repeat(3, 1fr); }
-    .panel {
+    .hero, .panel {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
-    .pad { padding: 22px; }
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #eef4ff;
-      border: 1px solid #d8e4ff;
-      color: #244ea7;
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .formula {
-      font-size: clamp(28px, 3vw, 42px);
+    .hero { padding: 16px; }
+    .eyebrow {
+      font-size: 11px;
       font-weight: 800;
-      margin: 12px 0;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 8px;
     }
-    .muted { color: var(--muted); }
-    .section {
-      margin-top: 24px;
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 44px);
+      line-height: 1.06;
+      letter-spacing: -.03em;
     }
-    .section h2 {
-      margin: 0 0 10px;
-      font-size: clamp(24px, 3vw, 34px);
-    }
-    .softbox, .stat, .control, .mini, .summary, .callout {
-      background: var(--soft);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-    }
-    .softbox { padding: 18px; }
-    .stat, .control, .mini, .summary { padding: 16px; }
-    .stat .label, .control .label {
+    .lead {
+      margin: 10px 0 0;
       color: var(--muted);
-      font-size: 13px;
-    }
-    .stat .value {
-      font-size: 30px;
-      font-weight: 800;
-      margin-top: 6px;
-    }
-    .stat .subv {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .one-line {
-      margin-top: 14px;
-      padding: 14px 16px;
-      background: #f8fbff;
-      border: 1px solid #dfe8ff;
-      border-radius: 14px;
-      font-weight: 600;
-      color: #27426d;
-    }
-    .canvas-wrap { padding: 18px; }
-    canvas {
-      width: 100%;
-      height: auto;
-      display: block;
-      background: #fcfdff;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-    }
-    .tiny {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 10px;
-    }
-    .steps { display: grid; gap: 14px; }
-    .step {
-      display: grid;
-      grid-template-columns: 54px 1fr;
-      gap: 14px;
-      padding: 16px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--soft);
-    }
-    .num {
-      width: 54px; height: 54px; border-radius: 999px;
-      display: grid; place-items: center;
-      background: linear-gradient(135deg, var(--blue), #7aa6ff);
-      color: #fff; font-weight: 800;
-    }
-    .step h4 { margin: 3px 0 6px; font-size: 18px; }
-    .step p { margin: 0; color: var(--muted); }
-    .row {
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      color: var(--muted); font-size: 13px; margin-bottom: 8px;
-    }
-    input[type="range"] { width: 100%; accent-color: var(--blue); }
-    button {
-      appearance: none; border: 1px solid var(--line); background: #fff; color: var(--text);
-      border-radius: 999px; padding: 10px 14px; font-weight: 700; cursor: pointer;
-    }
-    button.active { background: #eef4ff; color: #244ea7; border-color: #cfe0ff; }
-    .preset-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-    .metric {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 13px 14px; background: var(--soft); border: 1px solid var(--line); border-radius: 14px;
-    }
-    .metric b { font-size: 17px; }
-    .formula-lite {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 15px;
     }
-    .compare-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    .asset-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 0;
+    }
+    .asset-tab {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .asset-tab.active {
+      background: #eef4ff;
+      border-color: #cfdcff;
+      color: #214b9a;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+        .jump-chips {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 0;
+    }
+    .jump-chip {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: center;
+    }
+    .jump-chip.active {
+      background: #eef4ff;
+      border-color: #cfdcff;
+      color: #214b9a;
     }
     .pill {
-      display: inline-block; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .chart-panel {
+      margin-top: 14px;
+      padding: 12px;
+    }
+    .chart-wrap {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fcfdff;
+      overflow: hidden;
+    }
+    #kellyChart {
+      width: 100%;
+      height: min(54vh, 520px);
+      min-height: 340px;
+      display: block;
+      touch-action: none;
+    }
+    .chart-caption {
       margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
     }
-    .good { background: #e9fbf4; color: #0e7950; border: 1px solid #bfead7; }
-    .warn { background: #fff7df; color: #8d6400; border: 1px solid #f0de9d; }
-    .bad  { background: #fff0f4; color: #9d3045; border: 1px solid #f5c2cf; }
-    .mini h4, .summary h4 { margin: 0 0 8px; font-size: 17px; }
-    .mini p, .summary p { margin: 0; color: var(--muted); }
-    .footer-note {
-      margin-top: 16px; color: var(--muted); font-size: 13px;
+    .footer-dock {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(245,247,251,0) 0%, rgba(245,247,251,0.88) 18%, rgba(245,247,251,0.98) 40%);
+      backdrop-filter: blur(12px);
     }
-    @media (max-width: 980px) {
-      .hero-grid, .grid-2, .grid-3, .controls, .mini-cards, .compare-grid, .summary-grid { grid-template-columns: 1fr; }
-      .kpis { grid-template-columns: 1fr 1fr; }
+    .footer-dock .dock-group {
+      width: min(920px, calc(100vw - 16px));
+      margin: 0 auto 8px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 10px;
     }
-    @media (max-width: 640px) {
-      .wrap { width: min(100vw - 18px, 1180px); }
-      .kpis { grid-template-columns: 1fr; }
-      .step { grid-template-columns: 1fr; }
-      .num { width: 44px; height: 44px; }
+    .dock-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+    .dock-row { width: 100%; }
+    .dock-divider { height: 1px; background: var(--line); margin: 10px 0; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .kpi {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .kpi .label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .kpi .value {
+      margin-top: 6px;
+      font-size: clamp(22px, 5vw, 30px);
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+    .kpi .note {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .status {
+      margin-top: 12px;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px solid #dbe8ff;
+      padding: 14px;
+      font-weight: 700;
+      color: #214b9a;
+      min-height: 56px;
+    }
+    .block-title {
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .slider-value {
+      color: var(--text);
+      font-weight: 800;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+      margin: 0;
+    }
+    details.panel {
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    details.panel summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px;
+      font-weight: 900;
+      font-size: 15px;
+      user-select: none;
+    }
+    details.panel summary::-webkit-details-marker { display: none; }
+    .details-body {
+      padding: 0 16px 16px;
+      border-top: 1px solid var(--line);
+    }
+    .param-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .soft {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .formula {
+      margin-top: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      background: #f8fbff;
+      border: 1px solid #e0e8f5;
+      border-radius: 12px;
+      padding: 10px 12px;
+      overflow: auto;
+      white-space: nowrap;
+    }
+    .muted { color: var(--muted); }
+    .theory p { margin: 10px 0 0; }
+
+    @media (max-width: 740px) {
+      .wrap { width: calc(100vw - 16px); }
+      .hero { padding: 14px; }
+      .asset-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .chart-panel { padding: 12px; }
+      .jump-chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .footer-dock .dock-group { width: calc(100vw - 12px); margin-bottom: 6px; border-radius: 16px; }
+      .footer-dock .dock-title { margin-bottom: 6px; }
+      .footer-dock .dock-group { padding: 8px; }
+      #kellyChart { height: 52vh; min-height: 380px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="eyebrow">Kelly Criterion × Final HTML</div>
-      <h1>ケリー基準を、幾何平均と算術平均の違いから<br>自然につなげて理解する</h1>
-      <p class="lead">ケリー基準が最大化しているのは、単純な平均リターンではなく、長期の<strong>幾何平均成長率</strong>です。このページでは、まず幾何平均と算術平均の違いを図でつかみ、そのあとでボラティリティ・ドラッグ、ケリーの山型カーブ、σ の導出、ハーフケリーへ進みます。</p>
-      <div class="hero-grid">
-        <div class="panel pad">
-          <span class="tag">ケリー基準 = 長期の複利成長率を最大化するレバレッジ</span>
-          <div class="formula">L* = (μ − r) / σ²</div>
-          <p class="muted">レバレッジは期待収益を押し上げますが、同時に値動きの荒さも増やします。複利で見ると、その2つの力がちょうど釣り合う場所があり、それがケリー最適です。</p>
-          <div class="softbox">
-            <div class="formula">g(L) ≈ r + L(μ−r) − 0.5 × (Lσ)²</div>
-            <div class="muted">この近似式は、レバレッジで増える部分と、ボラティリティで削られる部分を同時に見ています。</div>
-          </div>
-          <div class="one-line">最適レバレッジは「たくさん賭けるほど良い」ではなく、「増やす力と削る力がちょうどつり合う点」で決まります。</div>
-        </div>
-        <div class="panel pad">
-          <div class="kpis">
-            <div class="stat"><div class="label">初期値 μ</div><div class="value" id="heroMu">10.0%</div><div class="subv">S&amp;P500の説明用設定</div></div>
-            <div class="stat"><div class="label">初期値 σ</div><div class="value" id="heroSigma">17.0%</div><div class="subv">後で導出を説明</div></div>
-            <div class="stat"><div class="label">借入金利 r</div><div class="value" id="heroRate">4.0%</div><div class="subv">レバコストの近似</div></div>
-            <div class="stat"><div class="label">ケリー最適 L*</div><div class="value" id="heroKelly">2.08x</div><div class="subv">S&amp;P500なら2倍前後</div></div>
-          </div>
-          <div class="one-line">このサイトで言いたい核は、S&amp;P500が特別なのではなく、μ と σ の組み合わせが 2 倍前後に山頂を作りやすいということです。</div>
-        </div>
-      </div>
-    </header>
+    <section class="hero panel chart-panel">
+      <div class="eyebrow">Kelly Curve Explorer</div>
+      <h1>Kelly Curve Explorer</h1>
+      <p class="lead">S&amp;P500・Nasdaq-100・半導体指数で、最適レバレッジの山頂を直感でつかむ</p>
 
-    <section class="section">
-      <div class="panel pad">
-        <h2>1. なぜ算術平均ではなく幾何平均を見るのか</h2>
-        <div class="grid-2">
-          <div>
-            <p class="muted">長期投資で知りたいのは、各年の平均点というより、結局いくらになったかです。たとえば、毎年 +10% で増えるケースと、+30%, -10%, +30%, -10% と上下に振れるケースは、どちらも算術平均は 10% です。それでも最終資産は前者が 146.41、後者が 136.89 で同じではありません。</p>
-            <p class="muted">これは、算術平均が途中の上下動を十分に反映していないからです。値動きが荒いほど、見た目の平均リターンほどにはお金は増えません。<strong>だから長期の複利成長を考えるときは、算術平均ではなく幾何平均を見る方が自然です。</strong></p>
-            <div class="one-line">算術平均は見た目の平均リターン、幾何平均は複利で見た実際の増え方に近い平均です。</div>
-          </div>
-          <div>
-            <div class="softbox">
-              <h3 style="margin:0 0 8px; font-size:20px;">算術平均</h3>
-              <div class="formula-lite">(r₁ + r₂ + … + rₙ) / n</div>
-              <p class="muted" style="margin:10px 0 0;">各年のリターンを単純に平均したものです。各年の平均点を見るには便利ですが、複利の最終結果をそのまま表すわけではありません。</p>
-            </div>
-            <div class="softbox" style="margin-top:14px;">
-              <h3 style="margin:0 0 8px; font-size:20px;">幾何平均</h3>
-              <div class="formula-lite">[(1+r₁)(1+r₂)…(1+rₙ)]^(1/n) − 1</div>
-              <p class="muted" style="margin:10px 0 0;">実際の最終資産額と同じ結果になる「毎年一定の成長率」です。長期投資の複利成長率を見るなら、こちらの方が本質に近いです。</p>
-            </div>
-            <div class="mini-cards" style="margin-top:14px;">
-              <div class="mini"><h4>ケースA</h4><p>+10%, +10%, +10%, +10%</p><p style="margin-top:6px;"><strong>最終資産 146.41</strong></p></div>
-              <div class="mini"><h4>ケースB</h4><p>+30%, -10%, +30%, -10%</p><p style="margin-top:6px;"><strong>最終資産 136.89</strong></p></div>
-              <div class="mini"><h4>共通点</h4><p>どちらも算術平均 10%</p><p style="margin-top:6px;"><strong>でも結果は同じではない</strong></p></div>
-            </div>
-          </div>
+      <div class="hero-meta">
+        <div class="pill" id="pillMu">μ 10%</div>
+        <div class="pill" id="pillSigma">σ 17%</div>
+        <div class="pill" id="pillRate">借入金利 4%</div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="kellyChart"></canvas>
+      </div>
+      <div class="chart-caption">青い点が「今見ている倍率」、緑の点が「理論上の山頂」です。下のボタンで 1x / 2x / 3x / Half Kelly / Optimal をすばやく比較できます。</div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="label">最適レバレッジ</div>
+          <div class="value" id="kpiOptimal">2.08x</div>
+          <div class="note">理論上の山頂</div>
+        </div>
+        <div class="kpi">
+          <div class="label">今のレバレッジ</div>
+          <div class="value" id="kpiCurrent">1.00x</div>
+          <div class="note">グラフ上の青い点</div>
+        </div>
+        <div class="kpi">
+          <div class="label">幾何平均成長率</div>
+          <div class="value" id="kpiGrowth">8.56%</div>
+          <div class="note">今の倍率での成長率</div>
         </div>
       </div>
+
+      <div class="status" id="statusBox"></div>
     </section>
 
-<section class="section">
-      <div class="panel pad">
-        <h2>3. ボラティリティが高いほど、幾何平均は下がりやすい</h2>
-        <div class="steps">
-          <div class="step">
-            <div class="num">1</div>
-            <div>
-              <h4>期待リターンが同じでも、値動きが荒いと複利は不利になる</h4>
-              <p>同じ算術平均でも、上下に大きく揺れる経路は最終資産額が低くなりやすくなります。これがボラティリティ・ドラッグです。</p>
-            </div>
+    <details class="panel">
+      <summary>詳細パラメータを調整</summary>
+      <div class="details-body">
+        <div class="param-grid">
+          <div class="soft">
+            <div class="slider-label-row"><span>期待リターン μ</span><span class="slider-value" id="muValue">10.0%</span></div>
+            <input id="muRange" type="range" min="0.04" max="0.18" step="0.001" value="0.10">
           </div>
-          <div class="step">
-            <div class="num">2</div>
-            <div>
-              <h4>レバレッジは期待収益を押し上げるが、ボラも同時に増やす</h4>
-              <p>レバレッジを上げるほど、期待収益のプラス面も、値動きのマイナス面も大きくなります。</p>
-            </div>
+          <div class="soft">
+            <div class="slider-label-row"><span>ボラティリティ σ</span><span class="slider-value" id="sigmaValue">17.0%</span></div>
+            <input id="sigmaRange" type="range" min="0.10" max="0.40" step="0.001" value="0.17">
           </div>
-          <div class="step">
-            <div class="num">3</div>
-            <div>
-              <h4>その差し引きの山頂がケリー最適になる</h4>
-              <p>押し上げる力と削る力の差が最大になる場所が、長期の幾何平均成長率を最大化する点です。</p>
-            </div>
-          </div>
-        </div>
-        <div class="one-line">長期投資では、平均リターンを大きく見せることよりも、ボラティリティで複利がどれだけ削られるかを見る方が重要です。</div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="panel pad">
-        <h2>4. ケリーの山型カーブを見る</h2>
-        <p class="muted">式と幾何平均の意味を見たあとで、実際の山型カーブに戻ります。ここでは S&amp;P500 / QQQ / SOX をプリセットにして、フルケリーとハーフケリーの位置関係も確認できます。</p>
-        <div class="grid-2">
-          <div class="panel canvas-wrap">
-            <canvas id="growthChart" width="760" height="420"></canvas>
-            <div class="tiny">青線が近似的な幾何平均成長率。緑がフルケリー、金がハーフケリー、赤がクォーターケリー、白が現在選択中のレバレッジです。</div>
-          </div>
-          <div class="panel pad">
-            <div class="controls">
-              <div class="control">
-                <div class="label">期待リターン μ</div>
-                <div class="row"><span>年率</span><strong id="muLabel">10.0%</strong></div>
-                <input id="muRange" type="range" min="0.02" max="0.22" step="0.005" value="0.10">
-              </div>
-              <div class="control">
-                <div class="label">ボラティリティ σ</div>
-                <div class="row"><span>年率</span><strong id="sigmaLabel">17.0%</strong></div>
-                <input id="sigmaRange" type="range" min="0.08" max="0.45" step="0.005" value="0.17">
-              </div>
-              <div class="control">
-                <div class="label">借入金利 r</div>
-                <div class="row"><span>年率</span><strong id="rateLabel">4.0%</strong></div>
-                <input id="rateRange" type="range" min="0.00" max="0.08" step="0.0025" value="0.04">
-              </div>
-            </div>
-            <div class="control" style="margin-top:16px;">
-              <div class="label">表示中のレバレッジ L</div>
-              <div class="row"><span>現在地</span><strong id="levLabel">1.00x</strong></div>
-              <input id="levRange" type="range" min="0" max="4" step="0.01" value="1">
-            </div>
-            <div class="preset-row">
-              <button data-preset="sp500" class="preset active">S&amp;P500</button>
-              <button data-preset="qqq" class="preset">QQQ風</button>
-              <button data-preset="sox" class="preset">SOX風</button>
-              <button id="jumpKelly">フルケリーへ</button>
-              <button id="jumpHalf">ハーフケリーへ</button>
-            </div>
-            <div style="display:grid; gap:12px; margin-top:16px;">
-              <div class="metric"><span>フルケリー</span><b id="kFull">2.08x</b></div>
-              <div class="metric"><span>ハーフケリー</span><b id="kHalf">1.04x</b></div>
-              <div class="metric"><span>クォーターケリー</span><b id="kQuarter">0.52x</b></div>
-              <div class="metric"><span>選択中の g(L)</span><b id="gNow">7.11%</b></div>
-            </div>
-            <div class="one-line">2倍がいつも正しいのではなく、その資産の μ と σ がどこに山頂を作るかを見るのが本質です。</div>
+          <div class="soft">
+            <div class="slider-label-row"><span>借入金利 r</span><span class="slider-value" id="rateValue">4.0%</span></div>
+            <input id="rateRange" type="range" min="0.00" max="0.08" step="0.001" value="0.04">
           </div>
         </div>
       </div>
-    </section>
+    </details>
 
-    <section class="section">
-      <div class="panel pad">
-        <h2>5. σ はどう導出されるのか</h2>
-        <p class="muted">S&amp;P500 の σ=17% という数字は感覚ではなく、価格データから作ります。ここでの σ は価格の散らばりではなく、リターンの散らばりです。</p>
-        <div class="grid-2">
-          <div class="steps">
-            <div class="step">
-              <div class="num">A</div>
-              <div>
-                <h4>日次リターンを作る</h4>
-                <p><span class="formula-lite">rₜ = ln(Pₜ / Pₜ₋₁)</span> のように、日ごとの変化率を並べます。価格そのものではなく、どれくらい動いたかを見るためです。</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="num">B</div>
-              <div>
-                <h4>その標準偏差を取る</h4>
-                <p>日次ログリターン列の標準偏差が日次ボラティリティです。σ は「どれくらいブレやすいか」を表しています。</p>
-              </div>
-            </div>
-            <div class="step">
-              <div class="num">C</div>
-              <div>
-                <h4>年率化する</h4>
-                <p><span class="formula-lite">σ_year = σ_daily × √252</span> として年率にそろえます。営業日ベースなら 252 日を使うことが多いです。</p>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div class="softbox">
-              <h3 style="margin:0 0 8px; font-size:20px;">σ の見方</h3>
-              <div class="formula-lite">σ = std(日次ログリターン) × √252</div>
-              <p class="muted" style="margin:10px 0 0;">期間を 3 年にするか 10 年にするかで σ は変わりえます。固定された真実というより、どのデータ窓で測ったかに依存する入力値です。</p>
-            </div>
-            <div class="one-line" style="margin-top:14px;">「S&amp;P500 の σ は 17%」という言い方の中身は、過去のリターンのブレを集計して年換算した数字です。</div>
-          </div>
-        </div>
+    <details class="panel theory">
+      <summary>なぜ山型になるのか</summary>
+      <div class="details-body">
+        <p class="muted">レバレッジを上げると、期待リターンの押し上げと同時に、ボラティリティによる目減りも大きくなります。最初はリターンの押し上げが勝ちますが、どこかでボラティリティの悪影響が上回り、カーブは山型になります。</p>
+        <div class="formula">g(L) ≈ r + L(μ − r) − ½L²σ²</div>
       </div>
-    </section>
+    </details>
 
-    <section class="section">
-      <div class="panel pad">
-        <h2>6. 比較は S&amp;P500 / QQQ / SOX のベース資産に絞る</h2>
-        <p class="muted">比較スペースは小さめにして、まず元資産の違いを見る形にしています。固定 3 倍 ETF の名前より先に、元資産の μ と σ の違いを押さえた方がケリーの話に直結します。</p>
-        <div class="compare-grid" id="assetCompare"></div>
+    <details class="panel theory">
+      <summary>幾何平均とは何か</summary>
+      <div class="details-body">
+        <p class="muted">長期投資で知りたいのは、各年の平均点というより、結局いくらになったかです。幾何平均は、値動きを含めたうえで、資産が実際にどれくらいのペースで増えたかに近い平均です。</p>
       </div>
-    </section>
+    </details>
 
-    <section class="section">
-      <div class="panel pad">
-        <h2>7. ハーフケリーがよく出てくる理由</h2>
-        <div class="grid-3">
-          <div class="summary">
-            <h4>フルケリー</h4>
-            <p>理論上の幾何平均成長率を最大化します。前提が当たっているなら山頂そのものです。</p>
-          </div>
-          <div class="summary">
-            <h4>ハーフケリー</h4>
-            <p>成長率をかなり残しながら、レバレッジ由来の揺れを大きく抑えます。推定誤差にもやや強くなります。</p>
-          </div>
-          <div class="summary">
-            <h4>クォーターケリー</h4>
-            <p>さらに保守的です。モデルに自信がないときや、持ち続けやすさを重視するときの選択肢です。</p>
-          </div>
-        </div>
-        <div class="one-line">理論上もっとも速く増える量と、現実に持ち続けやすい量は同じとは限りません。そこでフラクショナル・ケリーが出てきます。</div>
+    <details class="panel theory">
+      <summary>なぜハーフケリーがよく使われるのか</summary>
+      <div class="details-body">
+        <p class="muted">理論上の山頂は最適点ですが、その近くはボラティリティも大きくなります。実運用では不確実性を考えて、山頂より少し左、つまり 1/2 ケリー前後を使うことがよくあります。</p>
       </div>
-    </section>
-
-    <section class="section">
-      <div class="panel pad">
-        <h2>8. パス依存も最後に補助図として見る</h2>
-        <p class="muted">同じ平均リターンでも、値動きの順番が荒いほど複利の結果は落ちます。ここは主役ではなく補助ですが、長期投資ではかなり重要な感覚です。</p>
-        <div class="grid-2">
-          <div>
-            <div class="controls" style="grid-template-columns: repeat(4, 1fr);">
-              <div class="control"><div class="label">年数</div><div class="row"><span>期間</span><strong id="yearsLabel">20年</strong></div><input id="yearsRange" type="range" min="5" max="40" step="1" value="20"></div>
-              <div class="control"><div class="label">乱数シード</div><div class="row"><span>再現用</span><strong id="seedLabel">7</strong></div><input id="seedRange" type="range" min="1" max="99" step="1" value="7"></div>
-              <div class="control"><div class="label">追加ショック</div><div class="row"><span>途中の急落</span><strong id="shockLabel">なし</strong></div><input id="shockRange" type="range" min="0" max="3" step="1" value="0"></div>
-              <div class="control"><div class="label">再生成</div><button id="reroll" style="width:100%; margin-top:12px;">別の価格パスを生成</button></div>
-            </div>
-            <div class="one-line" style="margin-top:16px;">同じ期待リターンでも、道のりがデコボコだと最後の資産額は変わります。複利は順番の影響を受けます。</div>
-          </div>
-          <div class="panel canvas-wrap">
-            <canvas id="pathChart" width="760" height="360"></canvas>
-            <div class="tiny">青: 1x / 金: Half Kelly / 緑: Full Kelly / 赤: 3x</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="panel pad">
-        <h2>最後にまとめると</h2>
-        <div class="summary-grid">
-          <div class="summary"><h4>幾何平均</h4><p>長期投資で何倍になったかに対応する平均成長率です。ケリー基準が最大化しているのはこれです。</p></div>
-          <div class="summary"><h4>ボラティリティ</h4><p>値動きが荒いほど、幾何平均は算術平均より下がりやすくなります。複利ではブレが重い意味を持ちます。</p></div>
-          <div class="summary"><h4>ケリー基準</h4><p>期待収益を増やす力と、ボラティリティで削られる力の差が最大になるレバレッジを探しています。</p></div>
-        </div>
-        <div class="one-line">S&amp;P500 で 2 倍前後が筋が良いという話は、「S&amp;P が特別だから」ではなく、期待リターンとボラティリティの組み合わせがそのあたりに山頂を作りやすいからです。</div>
-        <div class="footer-note">このページは教育用の近似モデルです。実際の投資結果は、将来のリターン、ボラティリティ、金利、コスト、税制、トラッキング差などで大きく変わります。</div>
-      </div>
-    </section>
+    </details>
   </div>
+    <div class="footer-dock">
+      <div class="dock-group dock-combined">
+        <div class="dock-title">資産を切り替える</div>
+        <div class="dock-row asset-tabs" id="assetTabs">
+          <button class="asset-tab active" data-asset="sp500">S&amp;P500</button>
+          <button class="asset-tab" data-asset="nasdaq">Nasdaq-100</button>
+          <button class="asset-tab" data-asset="semi">半導体指数</button>
+        </div>
+        <div class="dock-divider"></div>
+        <div class="dock-title">代表的な倍率を見る</div>
+        <div class="dock-row jump-chips" id="jumpChips">
+          <button class="jump-chip active" data-jump="1">1x</button>
+          <button class="jump-chip" data-jump="2">2x</button>
+          <button class="jump-chip" data-jump="3">3x</button>
+          <button class="jump-chip" data-jump="half">Half Kelly</button>
+          <button class="jump-chip" data-jump="optimal">Optimal</button>
+        </div>
+      </div>
+    </div>
 
   <script>
-    const state = {
-      mu: 0.10,
-      sigma: 0.17,
-      rate: 0.04,
-      lev: 1.0,
-      years: 20,
-      seed: 7,
-      shock: 0,
-      preset: 'sp500'
+    const assets = {
+      sp500: { label: 'S&P500', mu: 0.10, sigma: 0.17, rate: 0.04 },
+      nasdaq: { label: 'Nasdaq-100', mu: 0.12, sigma: 0.24, rate: 0.04 },
+      semi: { label: '半導体指数', mu: 0.13, sigma: 0.32, rate: 0.04 }
     };
 
-    const presets = {
-      sp500: { mu: 0.10, sigma: 0.17, rate: 0.04, label: 'S&P500' },
-      qqq:   { mu: 0.12, sigma: 0.24, rate: 0.04, label: 'QQQ風' },
-      sox:   { mu: 0.13, sigma: 0.32, rate: 0.04, label: 'SOX風' }
-    };
+    const state = { asset: 'sp500', mu: 0.10, sigma: 0.17, rate: 0.04, lev: 1.00, selectedJump: '1' };
 
-    const compareAssets = [
-      { name: 'S&P500', mu: 0.10, sigma: 0.17, text: '値動きがそこまで荒すぎないので、最適レバレッジは比較的高めになりやすいです。' },
-      { name: 'QQQ', mu: 0.12, sigma: 0.24, text: 'S&P500より荒いので、同じ感覚でレバをかけるとやや行きすぎやすくなります。' },
-      { name: 'SOX', mu: 0.13, sigma: 0.32, text: 'かなり荒いので、固定3倍は最適点を超えやすくなります。' }
-    ];
-
+    const el = id => document.getElementById(id);
     const fmtPct = v => `${(v * 100).toFixed(1)}%`;
     const fmtPct2 = v => `${(v * 100).toFixed(2)}%`;
-    const fmtX = v => `${v.toFixed(2)}x`;
-    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-    const arithMean = arr => arr.reduce((a,b)=>a+b,0) / arr.length;
-    const geoMean = arr => Math.pow(arr.reduce((a,b)=>a*(1+b),1), 1/arr.length) - 1;
-    function kelly(mu, sigma, rate) { return sigma <= 0 ? 0 : Math.max(0, (mu - rate) / (sigma * sigma)); }
-    function gOfL(L, mu, sigma, rate) { return rate + L * (mu - rate) - 0.5 * Math.pow(L * sigma, 2); }
+    const fmtLev = v => `${v.toFixed(2)}x`;
+    const growth = (L, mu, sigma, rate) => rate + L * (mu - rate) - 0.5 * L * L * sigma * sigma;
+    const optimalLev = (mu, sigma, rate) => Math.max(0, (mu - rate) / (sigma * sigma));
 
-    function drawAxes(ctx, rect, yMin, yMax, xMax, yTicks = 6, xTicks = 8) {
-      const { x, y, w, h } = rect;
-      ctx.strokeStyle = 'rgba(91,105,128,.16)';
-      ctx.lineWidth = 1;
-      ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(91,105,128,.92)';
-      for (let i = 0; i <= yTicks; i++) {
-        const yy = y + (h * i / yTicks);
-        ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x + w, yy); ctx.stroke();
-        const val = yMax - (yMax - yMin) * i / yTicks;
-        ctx.fillText(val.toFixed(2), 8, yy + 4);
-      }
-      for (let i = 0; i <= xTicks; i++) {
-        const xx = x + (w * i / xTicks);
-        ctx.beginPath(); ctx.moveTo(xx, y); ctx.lineTo(xx, y + h); ctx.stroke();
-        const val = xMax * i / xTicks;
-        ctx.fillText(val.toFixed(1), xx - 6, y + h + 20);
-      }
+    const canvas = el('kellyChart');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw();
     }
 
-    function drawSeriesChart(canvasId, series, xLabels, yMin, yMax, legend = true) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const rect = { x: 52, y: 24, w: canvas.width - 86, h: canvas.height - 62 };
-      ctx.strokeStyle = 'rgba(91,105,128,.16)';
-      ctx.lineWidth = 1;
-      ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(91,105,128,.92)';
-      for (let i = 0; i <= 6; i++) {
-        const yy = rect.y + rect.h * i / 6;
-        ctx.beginPath(); ctx.moveTo(rect.x, yy); ctx.lineTo(rect.x + rect.w, yy); ctx.stroke();
-        const val = yMax - (yMax - yMin) * i / 6;
-        ctx.fillText(val.toFixed(2), 8, yy + 4);
-      }
-      for (let i = 0; i < xLabels.length; i++) {
-        const xx = rect.x + rect.w * i / (xLabels.length - 1);
-        ctx.beginPath(); ctx.moveTo(xx, rect.y); ctx.lineTo(xx, rect.y + rect.h); ctx.stroke();
-        ctx.fillText(String(xLabels[i]), xx - 6, rect.y + rect.h + 20);
-      }
-      const xMap = i => rect.x + rect.w * i / (xLabels.length - 1);
-      const yMap = v => rect.y + rect.h * (1 - (v - yMin)/(yMax-yMin));
-      series.forEach(s => {
-        ctx.strokeStyle = s.color;
-        ctx.lineWidth = s.width || 3;
-        ctx.beginPath();
-        s.values.forEach((v, i) => {
-          const xx = xMap(i), yy = yMap(v);
-          if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
-        });
-        ctx.stroke();
-        if (s.dots) {
-          s.values.forEach((v, i) => {
-            const xx = xMap(i), yy = yMap(v);
-            ctx.fillStyle = s.color;
-            ctx.beginPath(); ctx.arc(xx, yy, 4, 0, Math.PI * 2); ctx.fill();
-          });
-        }
+    function setJump(key) {
+      const opt = optimalLev(state.mu, state.sigma, state.rate);
+      state.selectedJump = key;
+      if (key === 'half') state.lev = opt / 2;
+      else if (key === 'optimal') state.lev = opt;
+      else state.lev = +key;
+      state.lev = Math.max(0, Math.min(4, state.lev));
+      document.querySelectorAll('.jump-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.jump === key);
       });
-      if (legend) {
-        let lx = rect.x + 8, ly = rect.y + 10;
-        series.forEach(s => {
-          ctx.fillStyle = s.color;
-          ctx.fillRect(lx, ly - 8, 12, 12);
-          ctx.fillStyle = '#34445d';
-          ctx.fillText(s.label, lx + 18, ly + 2);
-          ly += 20;
-        });
+      draw();
+    }
+
+    function setAsset(key) {
+      const a = assets[key];
+      state.asset = key;
+      state.mu = a.mu;
+      state.sigma = a.sigma;
+      state.rate = a.rate;
+      state.lev = Math.min(state.lev, 4);
+      document.querySelectorAll('.asset-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.asset === key);
+      });
+      syncControls();
+      setJump(state.selectedJump);
+    }
+
+    function syncControls() {
+      el('muRange').value = state.mu;
+      el('sigmaRange').value = state.sigma;
+      el('rateRange').value = state.rate;
+      el('muValue').textContent = fmtPct(state.mu);
+      el('sigmaValue').textContent = fmtPct(state.sigma);
+      el('rateValue').textContent = fmtPct(state.rate);
+      el('pillMu').textContent = `μ ${fmtPct(state.mu)}`;
+      el('pillSigma').textContent = `σ ${fmtPct(state.sigma)}`;
+      el('pillRate').textContent = `借入金利 ${fmtPct(state.rate)}`;
+    }
+
+    function buildStatus(current, optimal, currentGrowth) {
+      const half = optimal / 2;
+      if (current < optimal * 0.8) {
+        return `山頂は ${fmtLev(optimal)} 付近です。今の ${fmtLev(current)} はまだ山の左側にあり、レバレッジを増やすと成長率が上がりやすい位置です。`;
       }
+      if (Math.abs(current - optimal) < 0.15) {
+        return `今の ${fmtLev(current)} は山頂付近です。このあたりで幾何平均成長率が最大になりやすく、理論上はかなり攻めた位置です。`;
+      }
+      if (current > optimal) {
+        return `今の ${fmtLev(current)} は山頂 ${fmtLev(optimal)} を越えています。ここからはレバレッジを増やすほど、期待リターンよりボラティリティの悪影響が勝ちやすくなります。`;
+      }
+      return `今の ${fmtLev(current)} はハーフケリー ${fmtLev(half)} と山頂 ${fmtLev(optimal)} の間です。成長率は高めですが、実運用ではこのあたりでも十分に攻めた水準です。`;
     }
 
-    function renderAssetCompare() {
-      assetCompare.innerHTML = compareAssets.map(a => {
-        const k = kelly(a.mu, a.sigma, state.rate);
-        let cls = 'good', label = '比較的高め';
-        if (k < 1.5) { cls = 'bad'; label = 'かなり低め'; }
-        else if (k < 2.0) { cls = 'warn'; label = 'やや低め'; }
-        return `
-          <div class="mini">
-            <h4>${a.name}</h4>
-            <p class="muted">μ = ${fmtPct(a.mu)} / σ = ${fmtPct(a.sigma)}</p>
-            <p style="margin-top:8px;"><strong>理論ケリー: ${fmtX(k)}</strong></p>
-            <span class="pill ${cls}">${label}</span>
-            <p style="margin-top:10px;">${a.text}</p>
-          </div>
-        `;
-      }).join('');
-    }
+    function draw() {
+      const width = canvas.getBoundingClientRect().width;
+      const height = canvas.getBoundingClientRect().height;
+      ctx.clearRect(0, 0, width, height);
 
-    function drawGrowthChart() {
-      const canvas = document.getElementById('growthChart');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const rect = { x: 54, y: 24, w: canvas.width - 88, h: canvas.height - 62 };
-      const xMax = 4.0;
-      const values = [];
-      for (let i = 0; i <= 400; i++) values.push(gOfL(xMax * i / 400, state.mu, state.sigma, state.rate));
-      const yMin = Math.min(-0.20, ...values) - 0.01;
-      const yMax = Math.max(0.14, ...values) + 0.02;
-      drawAxes(ctx, rect, yMin, yMax, xMax);
-      const xMap = L => rect.x + rect.w * (L / xMax);
-      const yMap = g => rect.y + rect.h * (1 - ((g - yMin) / (yMax - yMin)));
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#2f6fed';
+      const pad = { l: 50, r: 18, t: 18, b: 34 };
+      const rect = { x: pad.l, y: pad.t, w: width - pad.l - pad.r, h: height - pad.t - pad.b };
+      const maxL = 4;
+      const opt = optimalLev(state.mu, state.sigma, state.rate);
+      const curve = [];
+      for (let i = 0; i <= 400; i++) {
+        const L = maxL * i / 400;
+        curve.push({ L, g: growth(L, state.mu, state.sigma, state.rate) });
+      }
+      const yMin = Math.min(-0.20, ...curve.map(p => p.g), growth(state.lev, state.mu, state.sigma, state.rate) - 0.02);
+      const yMax = Math.max(0.16, ...curve.map(p => p.g), growth(opt, state.mu, state.sigma, state.rate) + 0.02);
+      const xMap = v => rect.x + rect.w * (v / maxL);
+      const yMap = v => rect.y + rect.h * (1 - (v - yMin) / (yMax - yMin));
+
+      ctx.strokeStyle = 'rgba(96,112,137,.16)';
+      ctx.lineWidth = 1;
+      ctx.font = '12px system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(96,112,137,.92)';
+
+      [-0.10, 0, 0.05, 0.10, 0.15].forEach(v => {
+        if (v < yMin || v > yMax) return;
+        const yy = yMap(v);
+        ctx.beginPath(); ctx.moveTo(rect.x, yy); ctx.lineTo(rect.x + rect.w, yy); ctx.stroke();
+        ctx.fillText(`${(v * 100).toFixed(0)}%`, 8, yy + 4);
+      });
+      [0, 1, 2, 3, 4].forEach(v => {
+        const xx = xMap(v);
+        ctx.beginPath(); ctx.moveTo(xx, rect.y); ctx.lineTo(xx, rect.y + rect.h); ctx.stroke();
+        ctx.fillText(`${v}x`, xx - 9, rect.y + rect.h + 20);
+      });
+
       ctx.beginPath();
-      values.forEach((g, i) => {
-        const xx = xMap(xMax * i / 400), yy = yMap(g);
+      ctx.strokeStyle = '#2f6fed';
+      ctx.lineWidth = 4;
+      curve.forEach((p, i) => {
+        const xx = xMap(p.L), yy = yMap(p.g);
         if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy);
       });
       ctx.stroke();
-      const k = kelly(state.mu, state.sigma, state.rate);
-      const markers = [
-        { L: k, color: '#13976a', label: 'Full Kelly' },
-        { L: 0.5 * k, color: '#c48d08', label: 'Half Kelly' },
-        { L: 0.25 * k, color: '#c9485d', label: 'Quarter' },
-        { L: state.lev, color: '#ffffff', outline: '#2d3c55', label: 'Now' },
-      ];
-      markers.forEach(m => {
-        const g = gOfL(m.L, state.mu, state.sigma, state.rate);
-        const xx = xMap(clamp(m.L, 0, xMax));
-        const yy = yMap(g);
-        ctx.fillStyle = m.color;
-        ctx.strokeStyle = m.outline || 'rgba(255,255,255,.8)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(xx, yy, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = m.outline || m.color;
-        ctx.fillText(m.label, clamp(xx + 10, 10, canvas.width - 84), yy - 10);
+
+      [1, 2, 3].forEach(v => {
+        const yy = yMap(growth(v, state.mu, state.sigma, state.rate));
+        const xx = xMap(v);
+        ctx.save();
+        ctx.setLineDash([5, 6]);
+        ctx.strokeStyle = v === 3 ? 'rgba(217,72,95,.45)' : 'rgba(47,111,237,.22)';
+        ctx.beginPath(); ctx.moveTo(xx, rect.y); ctx.lineTo(xx, rect.y + rect.h); ctx.stroke();
+        ctx.restore();
+        ctx.fillStyle = v === 3 ? '#d9485f' : '#7e8fab';
+        ctx.fillText(`${v}x`, xx - 7, Math.max(rect.y + 16, yy - 10));
       });
+
+      const optG = growth(opt, state.mu, state.sigma, state.rate);
+      const curG = growth(state.lev, state.mu, state.sigma, state.rate);
+
+      const drawPoint = (x, y, color, radius=7) => {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x, y, radius / 2.6, 0, Math.PI * 2); ctx.fill();
+      };
+
+      drawPoint(xMap(opt), yMap(optG), '#1b936c', 8);
+      drawPoint(xMap(state.lev), yMap(curG), '#2f6fed', 8);
+
+      ctx.fillStyle = '#1b936c';
+      ctx.font = '700 12px system-ui, sans-serif';
+      ctx.fillText(`山頂 ${fmtLev(opt)}`, Math.max(rect.x + 6, xMap(opt) - 22), Math.max(rect.y + 14, yMap(optG) - 14));
+      ctx.fillStyle = '#2f6fed';
+      ctx.fillText(`今 ${fmtLev(state.lev)}`, Math.max(rect.x + 6, xMap(state.lev) - 18), yMap(curG) + 22);
+
+      el('kpiOptimal').textContent = fmtLev(opt);
+      el('kpiCurrent').textContent = fmtLev(state.lev);
+      el('kpiGrowth').textContent = fmtPct2(curG);
+      el('statusBox').textContent = buildStatus(state.lev, opt, curG);
     }
 
-    function lcg(seed) {
-      let s = seed >>> 0;
-      return function() {
-        s = (1664525 * s + 1013904223) >>> 0;
-        return s / 4294967296;
-      }
-    }
 
-    function boxMuller(rand) {
-      let u = 0, v = 0;
-      while (u === 0) u = rand();
-      while (v === 0) v = rand();
-      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-    }
+    document.querySelectorAll('.asset-tab').forEach(btn => {
+      btn.addEventListener('click', () => setAsset(btn.dataset.asset));
+    });
+    document.querySelectorAll('.jump-chip').forEach(btn => {
+      btn.addEventListener('click', () => setJump(btn.dataset.jump));
+    });
+    el('muRange').addEventListener('input', e => { state.mu = +e.target.value; syncControls(); setJump(state.selectedJump || '1'); });
+    el('sigmaRange').addEventListener('input', e => { state.sigma = +e.target.value; syncControls(); setJump(state.selectedJump || '1'); });
+    el('rateRange').addEventListener('input', e => { state.rate = +e.target.value; syncControls(); setJump(state.selectedJump || '1'); });
+    window.addEventListener('resize', resizeCanvas);
 
-    function simulatePath() {
-      const rand = lcg(state.seed + Math.floor(Math.random() * 10000));
-      const annual = [];
-      for (let i = 0; i < state.years; i++) annual.push(state.mu + state.sigma * boxMuller(rand));
-      if (state.shock > 0) {
-        const idx = Math.floor(state.years * 0.55);
-        const shocks = [0, -0.20, -0.35, -0.50];
-        annual[idx] += shocks[state.shock];
-      }
-      return annual.map(r => Math.max(-0.95, r));
-    }
-
-    let lastAnnual = null;
-    function drawPathChart() {
-      if (!lastAnnual) lastAnnual = simulatePath();
-      const k = kelly(state.mu, state.sigma, state.rate);
-      const strategies = [
-        { label: '1x', L: 1, color: '#2f6fed' },
-        { label: 'Half Kelly', L: 0.5 * k, color: '#c48d08' },
-        { label: 'Full Kelly', L: k, color: '#13976a' },
-        { label: '3x', L: 3, color: '#c9485d' }
-      ];
-      const series = strategies.map(s => {
-        let wealth = 1;
-        const pts = [1];
-        for (const r of lastAnnual) {
-          const net = state.rate + s.L * (r - state.rate);
-          wealth *= Math.max(0.02, 1 + net);
-          pts.push(wealth);
-        }
-        return { label: s.label, values: pts, color: s.color };
-      });
-      const ymax = Math.max(...series.flatMap(s => s.values)) * 1.08;
-      drawSeriesChart('pathChart', series, Array.from({length: state.years + 1}, (_,i)=>i), 0, Math.max(2, ymax), true);
-    }
-
-    function syncInputs() {
-      muRange.value = state.mu;
-      sigmaRange.value = state.sigma;
-      rateRange.value = state.rate;
-      levRange.value = state.lev;
-      yearsRange.value = state.years;
-      seedRange.value = state.seed;
-      shockRange.value = state.shock;
-    }
-
-    function updateLabels() {
-      muLabel.textContent = fmtPct(state.mu);
-      sigmaLabel.textContent = fmtPct(state.sigma);
-      rateLabel.textContent = fmtPct(state.rate);
-      levLabel.textContent = fmtX(state.lev);
-      yearsLabel.textContent = `${state.years}年`;
-      seedLabel.textContent = `${state.seed}`;
-      shockLabel.textContent = ['なし', '-20%を1回', '-35%を1回', '-50%を1回'][state.shock];
-    }
-
-    function setPreset(name) {
-      const p = presets[name];
-      state.mu = p.mu; state.sigma = p.sigma; state.rate = p.rate; state.preset = name;
-      document.querySelectorAll('.preset').forEach(btn => btn.classList.toggle('active', btn.dataset.preset === name));
-      syncInputs(); render();
-    }
-
-    function render() {
-      updateLabels();
-      const k = kelly(state.mu, state.sigma, state.rate);
-      heroMu.textContent = fmtPct(state.mu);
-      heroSigma.textContent = fmtPct(state.sigma);
-      heroRate.textContent = fmtPct(state.rate);
-      heroKelly.textContent = fmtX(k);
-      kFull.textContent = fmtX(k);
-      kHalf.textContent = fmtX(k * 0.5);
-      kQuarter.textContent = fmtX(k * 0.25);
-      gNow.textContent = fmtPct2(gOfL(state.lev, state.mu, state.sigma, state.rate));
-      drawGrowthChart();
-      drawPathChart();
-      renderAssetCompare();
-    }
-
-    const muRange = document.getElementById('muRange');
-    const sigmaRange = document.getElementById('sigmaRange');
-    const rateRange = document.getElementById('rateRange');
-    const levRange = document.getElementById('levRange');
-    const yearsRange = document.getElementById('yearsRange');
-    const seedRange = document.getElementById('seedRange');
-    const shockRange = document.getElementById('shockRange');
-
-    muRange.addEventListener('input', e => { state.mu = +e.target.value; lastAnnual = null; render(); });
-    sigmaRange.addEventListener('input', e => { state.sigma = +e.target.value; lastAnnual = null; render(); });
-    rateRange.addEventListener('input', e => { state.rate = +e.target.value; lastAnnual = null; render(); });
-    levRange.addEventListener('input', e => { state.lev = +e.target.value; render(); });
-    yearsRange.addEventListener('input', e => { state.years = +e.target.value; lastAnnual = null; render(); });
-    seedRange.addEventListener('input', e => { state.seed = +e.target.value; lastAnnual = null; render(); });
-    shockRange.addEventListener('input', e => { state.shock = +e.target.value; lastAnnual = null; render(); });
-
-    document.querySelectorAll('.preset').forEach(btn => btn.addEventListener('click', () => setPreset(btn.dataset.preset)));
-    document.getElementById('jumpKelly').addEventListener('click', () => { state.lev = kelly(state.mu, state.sigma, state.rate); syncInputs(); render(); });
-    document.getElementById('jumpHalf').addEventListener('click', () => { state.lev = 0.5 * kelly(state.mu, state.sigma, state.rate); syncInputs(); render(); });
-    document.getElementById('reroll').addEventListener('click', () => { lastAnnual = simulatePath(); state.seed += 1; if (state.seed > 99) state.seed = 1; syncInputs(); render(); });
-
-    syncInputs();
-    render();
+    syncControls();
+    setJump('1');
+    resizeCanvas();
   </script>
 </body>
 </html>
