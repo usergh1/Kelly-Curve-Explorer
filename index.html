@@ -424,9 +424,6 @@
     }
 
     function syncControls() {
-      el('muValue').textContent = fmtPct(state.mu);
-      el('sigmaValue').textContent = fmtPct(state.sigma);
-      el('rateValue').textContent = fmtPct(state.rate);
       el('pillMu').textContent = `μ ${fmtPct(state.mu)}`;
       el('pillSigma').textContent = `σ ${fmtPct(state.sigma)}`;
       el('pillRate').textContent = `借入金利 ${fmtPct(state.rate)}`;
